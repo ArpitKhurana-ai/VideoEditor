@@ -10,7 +10,7 @@ exec > >(tee /workspace/logs/app.log) 2>&1
 
 # Install system dependencies
 apt-get update
-apt-get install -y tzdata git ffmpeg wget python3-pip
+apt-get install -y tzdata git ffmpeg wget unzip python3-pip
 
 # Set timezone
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
@@ -21,17 +21,13 @@ mkdir -p /workspace/app
 mkdir -p /workspace/static/outputs
 mkdir -p /workspace/cookies
 
-# Clone GitHub repo into a clean folder
+# Download and extract GitHub repo (avoiding GitHub auth issues)
 echo "📦 Syncing project code..."
-if [ -d "/workspace/app/.git" ]; then
-    echo "✅ Repo already present. Pulling latest changes..."
-    cd /workspace/app && git pull
-else
-    echo "⬇️ Cloning fresh repo..."
-    rm -rf /workspace/app
-    git clone https://github.com/ArpitKhurana-ai/video-trimmer.git /workspace/app
-fi
-
+cd /workspace
+rm -rf /workspace/app /workspace/video-trimmer-main repo.zip
+wget https://github.com/ArpitKhurana-ai/video-trimmer/archive/refs/heads/main.zip -O repo.zip
+unzip repo.zip
+mv video-trimmer-main app
 
 # Go into app folder
 cd /workspace/app
@@ -40,7 +36,7 @@ cd /workspace/app
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Create placeholder cookies file if not present
+# Ensure cookies.txt exists
 touch /workspace/cookies/cookies.txt
 
 # Ensure all paths exist
@@ -51,7 +47,7 @@ echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
-# Print open ports
+# Show open ports
 ss -tulpn | grep LISTEN || true
 
 # Tail logs
