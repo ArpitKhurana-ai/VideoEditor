@@ -19,7 +19,7 @@ dpkg-reconfigure -f noninteractive tzdata
 # Clean previous broken attempts
 rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
 
-# Download and extract the correct GitHub ZIP
+# Download the correct GitHub ZIP
 echo "📦 Syncing project code from VideoEditor..."
 cd /workspace
 wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
@@ -33,11 +33,9 @@ cd /workspace/app
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# 🔧 FIXED: Ensure cookies directory exists before touching the file
+# Ensure cookies file and output folder exist
 mkdir -p /workspace/cookies
 touch /workspace/cookies/cookies.txt
-
-# Ensure output folder exists
 mkdir -p static/outputs
 
 # Launch the app in background
@@ -45,8 +43,8 @@ echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
-# Show open ports using netstat (ss not available)
+# Show open ports (using netstat instead of ss)
 netstat -tulpn || true
 
-# Tail the logs
+# Tail logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
