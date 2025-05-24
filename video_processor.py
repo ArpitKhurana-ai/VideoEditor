@@ -32,10 +32,7 @@ class VideoProcessor:
     def process_video(self, input_file, output_filename, start, end, top_text, bottom_text):
         output_path = os.path.join(self.video_dir, output_filename)
 
-        # Font that supports emojis
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-
-        # Save text inputs to files (for emoji-safe rendering)
         top_text_path = "/workspace/top_text.txt"
         bottom_text_path = "/workspace/bottom_text.txt"
 
@@ -46,25 +43,24 @@ class VideoProcessor:
             with open(bottom_text_path, "w", encoding="utf-8") as f:
                 f.write(bottom_text)
 
-        # Base scale and pad filter
+        # Resize + center the video
         vf_filter = (
             "scale=1080:-2:force_original_aspect_ratio=decrease,"
             "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black"
         )
 
-        # Add drawtext from file
+        # Text overlays positioned relative to actual video area (centered)
         if top_text:
             vf_filter += (
                 f",drawtext=fontfile='{font_path}':textfile='{top_text_path}':"
                 "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=100"
+                "x=(w-text_w)/2:y=((oh-ih)/2)-80"
             )
-
         if bottom_text:
             vf_filter += (
                 f",drawtext=fontfile='{font_path}':textfile='{bottom_text_path}':"
                 "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=h-th-100"
+                "x=(w-text_w)/2:y=((oh+ih)/2)+20"
             )
 
         command = [
