@@ -43,8 +43,24 @@ echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
+# ✅ Install and launch FileBrowser
+cd /workspace
+wget https://github.com/filebrowser/filebrowser/releases/latest/download/linux-amd64-filebrowser.tar.gz -O fb.tar.gz
+tar --no-same-owner -xvzf fb.tar.gz
+chmod +x filebrowser
+mv filebrowser /usr/local/bin/filebrowser
+mkdir -p /workspace/filebrowser
+chmod -R 777 /workspace/filebrowser
+
+filebrowser \
+  -r /workspace \
+  --address 0.0.0.0 \
+  -p 8080 \
+  -d /workspace/filebrowser/filebrowser.db \
+  > /workspace/filebrowser.log 2>&1 &
+
 # Show open ports (using netstat instead of ss)
 netstat -tulpn || true
 
 # Tail logs
-tail -f /workspace/logs/app.log /workspace/logs/flask.log
+tail -f /workspace/logs/app.log /workspace/logs/flask.log /workspace/filebrowser.log
