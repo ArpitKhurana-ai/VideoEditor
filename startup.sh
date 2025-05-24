@@ -16,33 +16,30 @@ apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 dpkg-reconfigure -f noninteractive tzdata
 
-# Create workspace folders
-mkdir -p /workspace/app
-mkdir -p /workspace/static/outputs
-mkdir -p /workspace/cookies
+# Clean previous broken attempts
+rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
 
-# ✅ Corrected GitHub repo name (case-sensitive!)
-echo "📦 Syncing project code..."
+# Download the correct GitHub ZIP
+echo "📦 Syncing project code from VideoEditor..."
 cd /workspace
-rm -rf /workspace/app /workspace/videoeditor-main repo.zip
-wget https://github.com/ArpitKhurana-ai/videoeditor/archive/refs/heads/main.zip -O repo.zip
+wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
 unzip -q repo.zip
-mv videoeditor-main app
+mv VideoEditor-main app
 
 # Go into app folder
 cd /workspace/app
 
-# Install Python dependencies
+# Install Python packages
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Ensure cookies.txt exists
+# Ensure cookies file exists
 touch /workspace/cookies/cookies.txt
 
-# Ensure all paths exist
+# Ensure output folder exists
 mkdir -p static/outputs
 
-# Launch Flask app in background
+# Launch the app in background
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
@@ -50,5 +47,5 @@ sleep 5
 # Show open ports
 ss -tulpn | grep LISTEN || true
 
-# Tail logs
+# Tail the logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
