@@ -32,24 +32,29 @@ class VideoProcessor:
     def process_video(self, input_file, output_filename, start, end, top_text, bottom_text):
         output_path = os.path.join(self.video_dir, output_filename)
 
-        # Construct complex ffmpeg filter for 9:16 portrait with text in black bars
+        # Font that supports emojis
+        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+        # Base padding and scaling filter
         vf_filter = (
-            "scale=1080:-1:force_original_aspect_ratio=decrease,"
+            "scale=1080:-2:force_original_aspect_ratio=decrease,"
             "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black"
         )
 
         # Add top text
         if top_text:
             vf_filter += (
-                f",drawtext=text='{top_text}':fontcolor=white:fontsize=48:"
-                f"x=(w-text_w)/2:y=50:font='Arial'"
+                f",drawtext=fontfile='{font_path}':text='{top_text}':"
+                "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
+                "x=(w-text_w)/2:y=100:escape=1"
             )
 
         # Add bottom text
         if bottom_text:
             vf_filter += (
-                f",drawtext=text='{bottom_text}':fontcolor=white:fontsize=48:"
-                f"x=(w-text_w)/2:y=h-th-60:font='Arial'"
+                f",drawtext=fontfile='{font_path}':text='{bottom_text}':"
+                "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
+                "x=(w-text_w)/2:y=h-th-100:escape=1"
             )
 
         command = [
