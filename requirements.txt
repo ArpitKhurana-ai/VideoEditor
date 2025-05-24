@@ -3,3 +3,4 @@ gunicorn
 yt-dlp
 moviepy
 ffmpeg-python
+validators
