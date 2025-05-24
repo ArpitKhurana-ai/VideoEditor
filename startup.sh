@@ -22,13 +22,16 @@ mkdir -p /workspace/static/outputs
 mkdir -p /workspace/cookies
 
 # Clone GitHub repo into a clean folder
+echo "📦 Syncing project code..."
 if [ -d "/workspace/app/.git" ]; then
-    echo "✅ Git repo already exists. Pulling latest changes..."
+    echo "✅ Repo already present. Pulling latest changes..."
     cd /workspace/app && git pull
 else
-    echo "⬇️ Cloning repo..."
+    echo "⬇️ Cloning fresh repo..."
+    rm -rf /workspace/app
     git clone https://github.com/ArpitKhurana-ai/video-trimmer.git /workspace/app
 fi
+
 
 # Go into app folder
 cd /workspace/app
