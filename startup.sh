@@ -3,48 +3,53 @@ set -xe
 
 echo "🟡 Starting YouTube Video Trimmer Setup..."
 
-# Create log folder and file
+# Logging
 mkdir -p /workspace/logs
 touch /workspace/logs/app.log
 exec > >(tee /workspace/logs/app.log) 2>&1
 
-# Install system dependencies
+# System Dependencies
 apt-get update -qq
 apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 
-# Set timezone
-ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
+# Set Timezone
+ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
 dpkg-reconfigure -f noninteractive tzdata
 
-# Clean previous app folders to avoid folder name conflicts
+# Clean and Prepare Workspace
 cd /workspace
-rm -rf /workspace/app /workspace/VideoEditor-main repo.zip
+rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
+mkdir -p /workspace/static/outputs
+mkdir -p /workspace/cookies
 
-# Download repo zip and extract
-echo "📦 Downloading code from GitHub..."
+# ✅ Download repo ZIP (case-sensitive fix)
+echo "📦 Downloading repo..."
 wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
-unzip -q repo.zip
-mv VideoEditor-main app
 
-# Go into app directory
+# ✅ Unzip and move to /workspace/app
+echo "📦 Unzipping..."
+unzip -q repo.zip
+mv -v VideoEditor-main app
+
+# ✅ Move into app folder
 cd /workspace/app
 
-# Install Python packages
+# Install Python dependencies
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Ensure folders exist
-mkdir -p static/outputs
-mkdir -p /workspace/cookies
+# Create cookies file if not present
 touch /workspace/cookies/cookies.txt
 
-# Launch Flask app in background
+# Ensure static output directory exists
+mkdir -p static/outputs
+
+# ✅ Launch app
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
-sleep 5
 
-# Show open ports
+sleep 5
 ss -tulpn | grep LISTEN || true
 
-# Tail logs
+# ✅ Tail logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
