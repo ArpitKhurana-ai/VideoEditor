@@ -25,7 +25,7 @@ mkdir -p /workspace/cookies
 echo "📦 Syncing project code..."
 cd /workspace
 rm -rf /workspace/app /workspace/video-trimmer-master repo.zip
-wget https://github.com/ArpitKhurana-ai/video-trimmer/archive/refs/heads/master.zip -O repo.zip
+wget https://github.com/ArpitKhurana-ai/video-trimmer/archive/refs/heads/main.zip -O repo.zip
 unzip -q repo.zip
 mv video-trimmer-master app
 
