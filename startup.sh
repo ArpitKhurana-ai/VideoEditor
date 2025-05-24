@@ -3,12 +3,12 @@ set -xe
 
 echo "🟡 Starting YouTube Video Trimmer Setup..."
 
-# 📁 Setup logs
+# 📝 Setup logs
 mkdir -p /workspace/logs
 touch /workspace/logs/app.log
 exec > >(tee /workspace/logs/app.log) 2>&1
 
-# 🧰 Install required packages
+# 📦 Install required packages
 apt-get update -qq
 apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 
@@ -21,7 +21,7 @@ mkdir -p /workspace/app
 mkdir -p /workspace/static/outputs
 mkdir -p /workspace/cookies
 
-# 📦 Download and extract GitHub repo
+# 📥 Download and extract GitHub repo
 echo "📦 Syncing project code..."
 cd /workspace
 rm -rf /workspace/app /workspace/VideoEditor-main repo.zip
@@ -29,25 +29,25 @@ wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip 
 unzip -q repo.zip
 mv VideoEditor-main app
 
-# 🔧 Go into app
+# ▶️ Go into app
 cd /workspace/app
 
-# 📦 Install Python dependencies
+# 🔧 Install Python packages
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# 📝 Create cookies.txt if missing
+# 📄 Create empty cookies.txt if not present
 touch /workspace/cookies/cookies.txt
 
-# 🧪 Ensure outputs folder exists
+# 🧱 Ensure all paths exist
 mkdir -p static/outputs
 
-# 🚀 Start Flask app
+# 🚀 Launch Flask app
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
-# 🌐 Show open ports
+# 🔌 Show open ports
 ss -tulpn | grep LISTEN || true
 
 # 📄 Tail logs
