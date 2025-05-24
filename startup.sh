@@ -3,43 +3,39 @@ set -xe
 
 echo "🟡 Starting YouTube Video Trimmer Setup..."
 
-# Create log folder and file
+# Log folder
 mkdir -p /workspace/logs
 touch /workspace/logs/app.log
 exec > >(tee /workspace/logs/app.log) 2>&1
 
-# Install system dependencies
+# Install deps
 apt-get update -qq
 apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 
-# Set timezone
+# Timezone
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 dpkg-reconfigure -f noninteractive tzdata
 
-# Clean previous broken attempts
-rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
+# Clean old folders
+rm -rf /workspace/app /workspace/logs/flask.log
 
-# Download the correct GitHub ZIP
-echo "📦 Syncing project code from VideoEditor..."
-cd /workspace
-wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
-unzip -q repo.zip
-mv VideoEditor-main app
+# ✅ Clone public GitHub repo reliably
+echo "📦 Cloning public repo..."
+git clone https://github.com/ArpitKhurana-ai/VideoEditor.git /workspace/app
 
-# Go into app folder
+# Navigate into app
 cd /workspace/app
 
-# Install Python packages
+# Python dependencies
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Ensure cookies file exists
+# Ensure runtime dirs
+mkdir -p /workspace/cookies
 touch /workspace/cookies/cookies.txt
-
-# Ensure output folder exists
 mkdir -p static/outputs
 
-# Launch the app in background
+# ✅ Launch the Flask app
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
@@ -47,5 +43,5 @@ sleep 5
 # Show open ports
 ss -tulpn | grep LISTEN || true
 
-# Tail the logs
+# Tail logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
