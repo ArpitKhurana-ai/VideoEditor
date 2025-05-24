@@ -1,83 +1,16 @@
-import os
-import subprocess
-import logging
-from config import Config
+main@192 ~ % curl -X POST https://r7eypnluq6qebv-8188.proxy.runpod.net/process \ 
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "start": "00:00:05",
+    "end": "00:00:20",
+    "top_text": "🔥 AI Tools Explained",
+    "bottom_text": "Watch till the end!",
+    "row_id": "clip-102"
+  }'
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-class VideoProcessor:
-    def __init__(self):
-        self.video_dir = Config.VIDEO_DIR
-        self.cookies_file = "/workspace/cookies/cookies.txt"
-        os.makedirs(self.video_dir, exist_ok=True)
-
-    def download_video(self, url, output_filename):
-        output_path = os.path.join(self.video_dir, output_filename)
-        command = [
-            'yt-dlp',
-            '--cookies', self.cookies_file,
-            '--format', 'mp4',
-            '--output', output_path,
-            url
-        ]
-        try:
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
-            logger.debug(result.stdout)
-            return os.path.exists(output_path), output_path
-        except subprocess.CalledProcessError as e:
-            logger.error(e.stderr)
-            return False, e.stderr
-
-    def process_video(self, input_file, output_filename, start, end, top_text, bottom_text):
-        output_path = os.path.join(self.video_dir, output_filename)
-
-        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        top_text_path = "/workspace/top_text.txt"
-        bottom_text_path = "/workspace/bottom_text.txt"
-
-        if top_text:
-            with open(top_text_path, "w", encoding="utf-8") as f:
-                f.write(top_text)
-        if bottom_text:
-            with open(bottom_text_path, "w", encoding="utf-8") as f:
-                f.write(bottom_text)
-
-        # Resize + center the video
-        vf_filter = (
-            "scale=1080:-2:force_original_aspect_ratio=decrease,"
-            "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black"
-        )
-
-        # Text overlays positioned relative to actual video area (centered)
-        if top_text:
-            vf_filter += (
-                f",drawtext=fontfile='{font_path}':textfile='{top_text_path}':"
-                "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=((oh-ih)/2)-80"
-            )
-        if bottom_text:
-            vf_filter += (
-                f",drawtext=fontfile='{font_path}':textfile='{bottom_text_path}':"
-                "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=((oh+ih)/2)+20"
-            )
-
-        command = [
-            'ffmpeg',
-            '-ss', start,
-            '-to', end,
-            '-i', input_file,
-            '-vf', vf_filter,
-            '-c:v', 'libx264',
-            '-c:a', 'aac',
-            '-y', output_path
-        ]
-
-        try:
-            result = subprocess.run(command, check=True, capture_output=True, text=True)
-            logger.debug(result.stdout)
-            return os.path.exists(output_path), output_path
-        except subprocess.CalledProcessError as e:
-            logger.error(e.stderr)
-            return False, e.stderr
+{
+  "message": "ffmpeg version 5.1.6-0+deb12u1 Copyright (c) 2000-2024 the FFmpeg developers\n  built with gcc 12 (Debian 12.2.0-14)\n  configuration: --prefix=/usr --extra-version=0+deb12u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librist --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --disable-sndio --enable-libjxl --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-libplacebo --enable-librav1e --enable-shared\n  libavutil      57. 28.100 / 57. 28.100\n  libavcodec     59. 37.100 / 59. 37.100\n  libavformat    59. 27.100 / 59. 27.100\n  libavdevice    59.  7.100 / 59.  7.100\n  libavfilter     8. 44.100 /  8. 44.100\n  libswscale      6.  7.100 /  6.  7.100\n  libswresample   4.  7.100 /  4.  7.100\n  libpostproc    56.  6.100 / 56.  6.100\nInput #0, mov,mp4,m4a,3gp,3g2,mj2, from 'static/outputs/clip-102_input.mp4':\n  Metadata:\n    major_brand     : mp42\n    minor_version   : 0\n    compatible_brands: isommp42\n    creation_time   : 2024-05-30T05:43:29.000000Z\n    encoder         : Google\n  Duration: 00:03:32.04, start: 0.000000, bitrate: 343 kb/s\n  Stream #0:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 640x360 [SAR 1:1 DAR 16:9], 211 kb/s, 25 fps, 25 tbr, 12800 tbn (default)\n    Metadata:\n      creation_time   : 2024-05-30T05:43:29.000000Z\n      handler_name    : ISO Media file produced by Google Inc. Created on: 05/29/2024.\n      vendor_id       : [0][0][0][0]\n  Stream #0:1[0x2](eng): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 128 kb/s (default)\n    Metadata:\n      creation_time   : 2024-05-30T05:43:29.000000Z\n      handler_name    : ISO Media file produced by Google Inc. Created on: 05/29/2024.\n      vendor_id       : [0][0][0][0]\nStream mapping:\n  Stream #0:0 -> #0:0 (h264 (native) -> h264 (libx264))\n  Stream #0:1 -> #0:1 (aac (native) -> aac (native))\nPress [q] to stop, [?] for help\n[Parsed_drawtext_2 @ 0x61f75e68b340] [Eval @ 0x7ffcf3e96b70] Undefined constant or missing '(' in 'oh-ih)/2)-80'\n[Parsed_drawtext_2 @ 0x61f75e68b340] Failed to parse expression: ((oh-ih)/2)-80 \n[Parsed_drawtext_2 @ 0x61f75e68b340] Failed to configure input pad on Parsed_drawtext_2\nError reinitializing filters!\nFailed to inject frame into filter network: Invalid argument\nError while processing the decoded data for stream #0:0\nConversion failed!\n",
+  "status": "error"
+}
+main@192 ~ % 
