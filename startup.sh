@@ -10,47 +10,43 @@ exec > >(tee /workspace/logs/app.log) 2>&1
 
 # Install system dependencies
 apt-get update -qq
-apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
+apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip net-tools
 
 # Set timezone
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 dpkg-reconfigure -f noninteractive tzdata
 
-# Clean up previous broken attempts
-rm -rf /workspace/app /workspace/videoeditor-* /workspace/VideoEditor-* /workspace/repo.zip
+# Clean previous broken attempts
+rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
 
-# Download the repo ZIP
-echo "📦 Downloading project from GitHub..."
+# Download and extract the correct GitHub ZIP
+echo "📦 Syncing project code from VideoEditor..."
 cd /workspace
 wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
 unzip -q repo.zip
+mv VideoEditor-main app
 
-# Dynamically detect extracted folder
-EXTRACTED_DIR=$(find . -maxdepth 1 -type d -name 'VideoEditor-*' -o -name 'videoeditor-*' | head -n 1)
-echo "📁 Detected extracted folder: $EXTRACTED_DIR"
-
-# Move to /workspace/app
-mv "$EXTRACTED_DIR" app
-
-# Go into the app directory
+# Go into app folder
 cd /workspace/app
 
-# Install Python dependencies
+# Install Python packages
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Ensure cookies and output folders exist
+# 🔧 FIXED: Ensure cookies directory exists before touching the file
 mkdir -p /workspace/cookies
 touch /workspace/cookies/cookies.txt
+
+# Ensure output folder exists
 mkdir -p static/outputs
 
-# Launch Flask app
+# Launch the app in background
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
-# Show open ports
-ss -tulpn | grep LISTEN || true
+# Show open ports using netstat (ss not available)
+netstat -tulpn || true
 
-# Tail logs
+# Tail the logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
