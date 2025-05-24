@@ -21,4 +21,8 @@ python3 app.py > /workspace/app.log 2>&1 &
 sleep 3
 
 # Tail logs to keep container alive
+mkdir -p /workspace
+touch /workspace/app.log
+python3 app.py >> /workspace/app.log 2>&1 &
 tail -f /workspace/app.log
+
