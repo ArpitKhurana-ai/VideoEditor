@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, send_from_directory
 from validators import validate_input
 from video_processor import VideoProcessor
 from config import Config
@@ -31,83 +31,73 @@ def options_process():
 
 @app.route('/process', methods=['POST'])
 def process_video():
-    # Get the JSON data from the request
     data = request.get_json()
-    
     if not data:
         logger.error("No JSON data received")
         return jsonify({"status": "error", "message": "No data provided"}), 400
-    
-    # Validate the input data
+
+    # Validate input
     is_valid, errors = validate_input(data)
     if not is_valid:
         logger.error(f"Input validation failed: {errors}")
         return jsonify({"status": "error", "message": errors}), 400
-    
-    # Extract data from request
+
     url = data['url']
     start_time = data['start']
     end_time = data['end']
     top_text = data.get('top_text', '')
     bottom_text = data.get('bottom_text', '')
     row_id = data['row_id']
-    
-    # Create filenames
+
     input_filename = f"{row_id}_input.mp4"
     output_filename = f"{row_id}.mp4"
-    
-    # Full paths
+
     input_path = os.path.join(Config.VIDEO_DIR, input_filename)
     output_path = os.path.join(Config.VIDEO_DIR, output_filename)
-    
+
     try:
-        # Download the video
         logger.info(f"Downloading video from {url}")
         download_success, download_result = video_processor.download_video(url, input_filename)
-        
         if not download_success:
             logger.error(f"Failed to download video: {download_result}")
             return jsonify({"status": "error", "message": download_result}), 500
-        
-        # Process the video
+
         logger.info(f"Processing video with start={start_time}, end={end_time}")
         process_success, process_result = video_processor.process_video(
-            input_path, 
-            output_path, 
-            start_time, 
-            end_time, 
-            top_text, 
-            bottom_text
+            input_path, output_path, start_time, end_time, top_text, bottom_text
         )
-        
+
         if not process_success:
             logger.error(f"Failed to process video: {process_result}")
             return jsonify({"status": "error", "message": process_result}), 500
-        
-        # Return success
+
         return jsonify({
-            "status": "success", 
-            "file": output_filename
+            "status": "success",
+            "file": output_filename,
+            "url": f"{request.url_root}static/outputs/{output_filename}"
         })
-        
+
     except Exception as e:
         logger.exception("Unexpected error during video processing")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/static/outputs/<filename>')
+def serve_output_file(filename):
+    return send_from_directory('static/outputs', filename)
+
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Simple health check endpoint"""
     return jsonify({"status": "up"})
 
 @app.route('/', methods=['GET'])
 def index():
-    """Root endpoint"""
     return jsonify({
         "name": "YouTube Video Trim API",
         "version": "1.0.0",
         "endpoints": {
             "/process": "POST - Process a YouTube video",
-            "/health": "GET - Health check"
+            "/health": "GET - Health check",
+            "/static/outputs/<filename>": "GET - Download a processed clip"
         }
     })
 
