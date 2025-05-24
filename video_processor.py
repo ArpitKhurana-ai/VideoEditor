@@ -35,26 +35,36 @@ class VideoProcessor:
         # Font that supports emojis
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
-        # Base padding and scaling filter
+        # Save text inputs to files (for emoji-safe rendering)
+        top_text_path = "/workspace/top_text.txt"
+        bottom_text_path = "/workspace/bottom_text.txt"
+
+        if top_text:
+            with open(top_text_path, "w", encoding="utf-8") as f:
+                f.write(top_text)
+        if bottom_text:
+            with open(bottom_text_path, "w", encoding="utf-8") as f:
+                f.write(bottom_text)
+
+        # Base scale and pad filter
         vf_filter = (
             "scale=1080:-2:force_original_aspect_ratio=decrease,"
             "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black"
         )
 
-        # Add top text
+        # Add drawtext from file
         if top_text:
             vf_filter += (
-                f",drawtext=fontfile='{font_path}':text='{top_text}':"
+                f",drawtext=fontfile='{font_path}':textfile='{top_text_path}':"
                 "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=100:escape=1"
+                "x=(w-text_w)/2:y=100"
             )
 
-        # Add bottom text
         if bottom_text:
             vf_filter += (
-                f",drawtext=fontfile='{font_path}':text='{bottom_text}':"
+                f",drawtext=fontfile='{font_path}':textfile='{bottom_text_path}':"
                 "fontsize=60:fontcolor=white:borderw=2:bordercolor=black:"
-                "x=(w-text_w)/2:y=h-th-100:escape=1"
+                "x=(w-text_w)/2:y=h-th-100"
             )
 
         command = [
