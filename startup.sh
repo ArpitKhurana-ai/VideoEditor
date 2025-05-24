@@ -16,6 +16,9 @@ apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip net-tools
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 dpkg-reconfigure -f noninteractive tzdata
 
+# Set the public RunPod URL manually (copy from Connection tab)
+export PUBLIC_URL="https://h0kkpv1lsi4zyq-8188.proxy.runpod.net"
+
 # Clean previous broken attempts
 rm -rf /workspace/app /workspace/VideoEditor-main /workspace/repo.zip
 
@@ -40,7 +43,7 @@ mkdir -p static/outputs
 
 # Launch the app in background
 echo "🚀 Launching Flask app..."
-python3 app.py > /workspace/logs/flask.log 2>&1 &
+PUBLIC_URL="$PUBLIC_URL" python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
 # ✅ Install and launch FileBrowser
@@ -59,7 +62,7 @@ filebrowser \
   -d /workspace/filebrowser/filebrowser.db \
   > /workspace/filebrowser.log 2>&1 &
 
-# Show open ports (using netstat instead of ss)
+# Show open ports
 netstat -tulpn || true
 
 # Tail logs
