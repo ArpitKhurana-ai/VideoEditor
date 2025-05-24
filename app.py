@@ -64,9 +64,10 @@ def process_video():
     if not success:
         return jsonify({"status": "error", "message": result}), 500
 
+    public_url = os.environ.get("PUBLIC_URL", request.url_root)
     return jsonify({
         "status": "success",
-        "url": f"{request.url_root}static/outputs/{output_name}"
+        "url": f"{public_url.rstrip('/')}/static/outputs/{output_name}"
     })
 
 @app.route('/static/outputs/<filename>')
