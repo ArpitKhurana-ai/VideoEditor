@@ -3,12 +3,12 @@ set -xe
 
 echo "🟡 Starting YouTube Video Trimmer Setup..."
 
-# Setup logs
+# Create log folder and file
 mkdir -p /workspace/logs
 touch /workspace/logs/app.log
 exec > >(tee /workspace/logs/app.log) 2>&1
 
-# Install required packages (incl. unzip early)
+# Install system dependencies
 apt-get update -qq
 apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 
@@ -16,43 +16,35 @@ apt-get install -y -qq tzdata git ffmpeg wget unzip python3-pip
 ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 dpkg-reconfigure -f noninteractive tzdata
 
-# Prepare workspace
-mkdir -p /workspace/static/outputs /workspace/cookies
+# Clean previous app folders to avoid folder name conflicts
 cd /workspace
 rm -rf /workspace/app /workspace/VideoEditor-main repo.zip
 
-# ✅ Download and unzip
-echo "📦 Downloading GitHub repo..."
+# Download repo zip and extract
+echo "📦 Downloading code from GitHub..."
 wget https://github.com/ArpitKhurana-ai/VideoEditor/archive/refs/heads/main.zip -O repo.zip
-
-echo "📦 Extracting zip..."
-unzip -q repo.zip || { echo "❌ Failed to unzip repo.zip"; exit 1; }
-
-# ✅ Verify extraction
-if [ ! -d "VideoEditor-main" ]; then
-    echo "❌ ERROR: Extracted folder 'VideoEditor-main' not found."
-    ls -la
-    exit 1
-fi
-
+unzip -q repo.zip
 mv VideoEditor-main app
+
+# Go into app directory
 cd /workspace/app
 
-# Python deps
+# Install Python packages
 pip install --upgrade pip
 pip install flask yt-dlp
 
-# Placeholder
-touch /workspace/cookies/cookies.txt
+# Ensure folders exist
 mkdir -p static/outputs
+mkdir -p /workspace/cookies
+touch /workspace/cookies/cookies.txt
 
-# Launch app
+# Launch Flask app in background
 echo "🚀 Launching Flask app..."
 python3 app.py > /workspace/logs/flask.log 2>&1 &
 sleep 5
 
-# Ports info
+# Show open ports
 ss -tulpn | grep LISTEN || true
 
-# Logs
+# Tail logs
 tail -f /workspace/logs/app.log /workspace/logs/flask.log
